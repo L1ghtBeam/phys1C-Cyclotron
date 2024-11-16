@@ -17,6 +17,7 @@ def main() -> None:
     parser.add_argument('-b', '--field', type=float, nargs=3, metavar=('X', 'Y', 'Z'),
                         help="magnetic field vector")
     parser.add_argument('-q', '--charge', type=float, help="charge of the particle")
+    parser.add_argument('-c', '--cycles', type=int, help="number of cycles of the particle")
 
     args = parser.parse_args()
 
@@ -27,6 +28,8 @@ def main() -> None:
         kwargs['B0'] = vector(args.field[0], args.field[1], args.field[2])
     if args.charge:
         kwargs['qparticle'] = args.charge
+    if args.cycles:
+        kwargs['cycles'] = args.cycles
 
     simulate(**kwargs)
 
@@ -34,7 +37,8 @@ def main() -> None:
 def simulate(
         vparticle: vector = vector(-2e6, 0, 0),
         B0: vector = vector(0, 0.2, 0),
-        qparticle: float = qe) -> None:
+        qparticle: float = qe,
+        cycles: int = -1) -> None:
     scene.width = 800
     scene.height = 800
 
@@ -51,6 +55,12 @@ def simulate(
     deltat = 5e-11
     t = 0
 
+    # calculate the period to determine the time for each cycle
+    # mag(cross(vparticle.norm(), B0)) calculates the amount of magnetic field which is perpendicular to the velocity
+    # of the particle
+    period = 2 * pi * mproton / abs(qparticle) / mag(cross(vparticle.norm(), B0))
+
+    # diameter setup
     diameter = curve(pos=[copy_vector(particle.pos), copy_vector(particle.pos)],
                      color=color.white)
     radius_printed = False
@@ -58,7 +68,7 @@ def simulate(
     while True:
         rate(500)
         ## YOUR CODE GOES HERE ##
-        if t < 3.34e-7:
+        if cycles < 1 or t < period * cycles:
             Fnet = qparticle * cross(vparticle, B0)
             p = p + Fnet * deltat
 
@@ -66,12 +76,13 @@ def simulate(
             particle.pos = particle.pos + vparticle * deltat
 
             # check and save diameter
-            if (distance(particle.pos, diameter.point(0)['pos']) >
+            if (not radius_printed and distance(particle.pos, diameter.point(0)['pos']) >
                     distance(diameter.point(1)['pos'], diameter.point(0)['pos'])):
                 diameter.modify(1, pos=copy_vector(particle.pos))
 
             t += deltat
-        elif not radius_printed:
+
+        if t > period and not radius_printed:
             r = distance(diameter.point(0)['pos'], diameter.point(1)['pos'])/2
             print(f"radius = {r:.3f} m")
             radius_printed = True
