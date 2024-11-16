@@ -58,7 +58,12 @@ def simulate(
     # calculate the period to determine the time for each cycle
     # mag(cross(vparticle.norm(), B0)) calculates the amount of magnetic field which is perpendicular to the velocity
     # of the particle
-    period = 2 * pi * mproton / abs(qparticle) / mag(cross(vparticle.norm(), B0))
+    try:
+        period = 2 * pi * mproton / abs(qparticle) / mag(cross(vparticle.norm(), B0))
+    except ZeroDivisionError:
+        # this is true if the particle will not form a circle (either charge is 0 or the magnetic field perpendicular
+        # to the charge is 0)
+        period = float('inf')
 
     # diameter setup
     diameter = curve(pos=[copy_vector(particle.pos), copy_vector(particle.pos)],
@@ -76,9 +81,10 @@ def simulate(
             particle.pos = particle.pos + vparticle * deltat
 
             # check and save diameter
-            if (not radius_printed and distance(particle.pos, diameter.point(0)['pos']) >
+            flat_pos = copy_vector(particle.pos, y=0.15)
+            if (not radius_printed and distance(flat_pos, diameter.point(0)['pos']) >
                     distance(diameter.point(1)['pos'], diameter.point(0)['pos'])):
-                diameter.modify(1, pos=copy_vector(particle.pos))
+                diameter.modify(1, pos=flat_pos)
 
             t += deltat
 
@@ -128,8 +134,8 @@ def distance(a: vector, b: vector) -> float:
     return mag(a - b)
 
 
-def copy_vector(v: vector) -> vector:
-    return vector(v.x, v.y, v.z)
+def copy_vector(v: vector, **kwargs) -> vector:
+    return vector(kwargs.get('x') or v.x, kwargs.get('y') or v.y, kwargs.get('z') or v.z)
 
 
 
