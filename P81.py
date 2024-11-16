@@ -7,6 +7,12 @@ def cross(a: vector, b: vector) -> vector:
         a.x * b.y - a.y * b.x,
     )
 
+def distance(a: vector, b: vector) -> float:
+    return mag(a - b)
+
+def copy_vector(v: vector) -> vector:
+    return vector(v.x, v.y, v.z)
+
 def main() -> None:
     scene.width = 800
     scene.height = 800
@@ -53,6 +59,10 @@ def main() -> None:
     qparticle = qe
     deltat = 5e-11
     t = 0
+
+    diameter = curve(pos=[copy_vector(particle.pos), copy_vector(particle.pos)],
+                     color=color.white)
+    radius_printed = False
     ###########################################
     while True:
         rate(500)
@@ -64,6 +74,16 @@ def main() -> None:
             vparticle = p/mproton
             particle.pos = particle.pos + vparticle * deltat
 
+            # check and save diameter
+            if (distance(particle.pos, diameter.point(0)['pos']) >
+                    distance(diameter.point(1)['pos'], diameter.point(0)['pos'])):
+                diameter.modify(1, pos=copy_vector(particle.pos))
+
             t += deltat
+        elif not radius_printed:
+            r = distance(diameter.point(0)['pos'], diameter.point(1)['pos'])/2
+            print(f"radius = {r:.3f} m")
+            radius_printed = True
+
 
 main()
