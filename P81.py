@@ -1,52 +1,45 @@
 from vpython import *
+from sys import argv
+from argparse import ArgumentParser
 
-def cross(a: vector, b: vector) -> vector:
-    return vector(
-        a.y * b.z - a.z * b.y,
-        a.z * b.x - a.x * b.z,
-        a.x * b.y - a.y * b.x,
-    )
 
-def distance(a: vector, b: vector) -> float:
-    return mag(a - b)
+## CONSTANTS ##
+qe = 1.6e-19
+mzofp = 1e-7    ## mu-zero-over-four-pi
+mproton = 1.7e-27
+bscale = 1
 
-def copy_vector(v: vector) -> vector:
-    return vector(v.x, v.y, v.z)
 
 def main() -> None:
+    parser = ArgumentParser()
+    parser.add_argument('-v', '--velocity', type=float, nargs=3, metavar=('X', 'Y', 'Z'),
+                        help="initial velocity vector of the particle")
+    parser.add_argument('-b', '--field', type=float, nargs=3, metavar=('X', 'Y', 'Z'),
+                        help="magnetic field vector")
+    parser.add_argument('-q', '--charge', type=float, help="charge of the particle")
+
+    args = parser.parse_args()
+
+    kwargs = {}
+    if args.velocity:
+        kwargs['vparticle'] = vector(args.velocity[0], args.velocity[1], args.velocity[2])
+    if args.field:
+        kwargs['B0'] = vector(args.field[0], args.field[1], args.field[2])
+    if args.charge:
+        kwargs['qparticle'] = args.charge
+
+    simulate(**kwargs)
+
+
+def simulate(
+        vparticle: vector = vector(-2e6, 0, 0),
+        B0: vector = vector(0, 0.2, 0),
+        qparticle: float = qe) -> None:
     scene.width = 800
     scene.height = 800
-    ## CONSTANTS ##
-    mzofp = 1e-7    ## mu-zero-over-four-pi
-    qe = 1.6e-19
-    mproton = 1.7e-27
-    B0 = vector(0, 0.2, 0)
-    bscale = 1
-    #### THIS CODE DRAWS A GRID ##
-    #### AND DISPLAYS A MAGNETIC FIELD ##
-    xmax = 0.4
-    dx = 0.1
-    yg = -0.1
-    x = -xmax
-    while x < xmax+dx:
-        curve(pos=[vector(x,yg,-xmax), vector(x,yg,xmax)],
-              color=vector(.7,.7,.7))
-        x = x + dx
-    z = -xmax
-    while z < xmax+dx:
-        curve(pos=[vector(-xmax,yg,z), vector(xmax,yg,z)],
-              color=vector(.7,.7,.7))
-        z = z + dx
-    x = -xmax
-    dx = 0.2
-    while x < xmax+dx:
-        z = -xmax
-        while z < xmax+dx:
-            arrow(pos=vector(x,yg,z),
-                  axis=B0*bscale,
-                  color=vector(0,.8,.8))
-            z = z + dx
-        x = x + dx
+
+    make_grid(B0, bscale)
+
     #### OBJECTS AND INITIAL CONDITIONS
     particle = sphere(pos=vector(0,0.15,0.3),
                       radius=1e-2,
@@ -54,9 +47,7 @@ def main() -> None:
                       make_trail=True)
     #### make trail easier to see (thicker) ##
     particle.trail_radius = particle.radius/3
-    vparticle = vector(-2e6, 0, 0)
     p = mproton * vparticle
-    qparticle = qe
     deltat = 5e-11
     t = 0
 
@@ -86,4 +77,50 @@ def main() -> None:
             radius_printed = True
 
 
-main()
+def make_grid(b0: vector, bscale: float) -> None:
+    #### THIS CODE DRAWS A GRID ##
+    #### AND DISPLAYS A MAGNETIC FIELD ##
+    xmax = 0.4
+    dx = 0.1
+    yg = -0.1
+    x = -xmax
+    while x < xmax + dx:
+        curve(pos=[vector(x, yg, -xmax), vector(x, yg, xmax)],
+              color=vector(.7, .7, .7))
+        x = x + dx
+    z = -xmax
+    while z < xmax + dx:
+        curve(pos=[vector(-xmax, yg, z), vector(xmax, yg, z)],
+              color=vector(.7, .7, .7))
+        z = z + dx
+    x = -xmax
+    dx = 0.2
+    while x < xmax + dx:
+        z = -xmax
+        while z < xmax + dx:
+            arrow(pos=vector(x, yg, z),
+                  axis=b0 * bscale,
+                  color=vector(0, .8, .8))
+            z = z + dx
+        x = x + dx
+
+
+def cross(a: vector, b: vector) -> vector:
+    return vector(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x,
+    )
+
+
+def distance(a: vector, b: vector) -> float:
+    return mag(a - b)
+
+
+def copy_vector(v: vector) -> vector:
+    return vector(v.x, v.y, v.z)
+
+
+
+if __name__ == '__main__':
+    main()
