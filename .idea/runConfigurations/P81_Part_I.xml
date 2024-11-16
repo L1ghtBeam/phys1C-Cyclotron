@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="P81 Part I" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="P81 Part I" type="PythonConfigurationType" factoryName="Python" folderName="P81">
     <module name="phys1CHonors2" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />

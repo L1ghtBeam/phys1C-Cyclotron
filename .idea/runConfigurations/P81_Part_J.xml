@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="P81 Part E" type="PythonConfigurationType" factoryName="Python" folderName="P81">
+  <configuration default="false" name="P81 Part J" type="PythonConfigurationType" factoryName="Python" folderName="P81">
     <module name="phys1CHonors2" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
@@ -15,7 +15,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/P81.py" />
-    <option name="PARAMETERS" value="--velocity -1e6 0 0 --cycles 1" />
+    <option name="PARAMETERS" value="--charge &quot; -1.6E-19&quot; --cycles 1" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
