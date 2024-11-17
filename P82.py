@@ -58,7 +58,7 @@ def simulate(angular_freq_mult: float = 1, time_per_sec: float=1.25e-8, rate_val
     E = charge_shell(5000, pos, neg, field_vectors)
 
     # graphs
-    ke_graph = graph(title="Kinetic Energy vs Time", xtitle="Time (s)", ytitle="KE (eV)", xmin=0, ymin=0)
+    ke_graph = graph(title="Kinetic Energy vs Time", xtitle="Time (ns)", ytitle="KE (eV)", xmin=0, ymin=0)
     gc = gcurve(color=color.blue)
 
     # Time variables
@@ -67,15 +67,17 @@ def simulate(angular_freq_mult: float = 1, time_per_sec: float=1.25e-8, rate_val
 
     # default = 5e-11
     deltat = time_per_sec / rate_val
+    print(f"Using delta_t = {deltat*1e9:.2g} ns")
     t = 0
     time_since_flip = period/4
 
-    escaped_cyclotron = False
+    print(f"Frequency = {angular_freq / (2 * pi * 1e6):.3g} MHz")
 
+    escaped_cyclotron = False
     while True:
         rate(rate_val)
 
-        gc.plot(t, mproton*mag(vparticle)**2/2/qe)
+        gc.plot(t*1e9, mproton*mag(vparticle)**2/2/qe)
 
         Fnet = vec(0, 0, 0)
         # magnetic field
@@ -83,7 +85,7 @@ def simulate(angular_freq_mult: float = 1, time_per_sec: float=1.25e-8, rate_val
             Fnet += qparticle * cross(vparticle, B0)
         elif not escaped_cyclotron:
             escaped_cyclotron = True
-            print(f"Escape velocity: {mag(vparticle):.3e} m/s")
+            print_result(t, period, mag(vparticle))
         # electric field
         if -gap/2 <= particle.pos.x <= gap/2 and 0 <= particle.pos.y <= height and -r <= particle.pos.z <= r:
             Fnet += qparticle * E
@@ -102,6 +104,14 @@ def simulate(angular_freq_mult: float = 1, time_per_sec: float=1.25e-8, rate_val
 
         t += deltat
         time_since_flip += deltat
+
+
+def print_result(time: float, period: float, speed: float) -> None:
+    print("\nParticle stats at escape:"
+          f"\n  Time:  {time*1e9: >9.3g} ns"
+          f"\n  Energy:{mproton * speed * speed / 2 / qe: >9.3g} eV"
+          f"\n  Cycles:{time/period: >9.0f}"
+          f"\n  Speed: {speed: >9.3g} m/s")
 
 
 def charge_shell(voltage: float, pos: compound, neg: compound, field_vectors: [arrow]) -> vector:
