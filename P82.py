@@ -1,4 +1,5 @@
 from vpython import *
+from argparse import ArgumentParser
 
 
 ## CONSTANTS ##
@@ -10,10 +11,27 @@ escale = 3e-9
 
 
 def main() -> None:
-    simulate()
+    parser = ArgumentParser()
+    parser.add_argument('-f', '--freq', type=float, metavar='MULTIPLE',
+                        help="multiple of the angular frequency")
+    parser.add_argument('-t', '--time', type=float, metavar='TIME',
+                        help="change in time per second")
+    parser.add_argument('-r', '--rate', type=int, metavar='RATE',
+                        help="simulations per second")
+    args = parser.parse_args()
+
+    kwargs = {}
+    if args.freq:
+        kwargs['angular_freq_mult'] = args.freq
+    if args.time:
+        kwargs['time_per_sec'] = args.time
+    if args.rate:
+        kwargs['rate_val'] = args.rate
+
+    simulate(**kwargs)
 
 
-def simulate() -> None:
+def simulate(angular_freq_mult: float = 1, time_per_sec: float=1.25e-8, rate_val: int=250) -> None:
     scene.width = 800
     scene.height = 800
 
@@ -40,21 +58,22 @@ def simulate() -> None:
     E = charge_shell(5000, pos, neg, field_vectors)
 
     # graphs
-    ke_graph = graph(title="Kinetic Energy vs time", xtitle="time (s)", ytitle="KE (eV)", xmin=0, ymin=0)
+    ke_graph = graph(title="Kinetic Energy vs Time", xtitle="Time (s)", ytitle="KE (eV)", xmin=0, ymin=0)
     gc = gcurve(color=color.blue)
 
     # Time variables
-    angular_freq = abs(qparticle) * mag(cross(vec(1, 0, 0), B0)) / mproton
+    angular_freq = angular_freq_mult * abs(qparticle) * mag(cross(vec(1, 0, 0), B0)) / mproton
     period = 2*pi/angular_freq
 
-    deltat = 5e-11
+    # default = 5e-11
+    deltat = time_per_sec / rate_val
     t = 0
     time_since_flip = period/4
 
     escaped_cyclotron = False
 
     while True:
-        rate(250)
+        rate(rate_val)
 
         gc.plot(t, mproton*mag(vparticle)**2/2/qe)
 
