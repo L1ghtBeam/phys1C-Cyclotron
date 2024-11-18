@@ -34,6 +34,7 @@ def main() -> None:
 def simulate(angular_freq_mult: float = 1, time_per_sec: float=1.25e-8, rate_val: int=250) -> None:
     scene.width = 800
     scene.height = 800
+    scene.align = 'left'
 
     B0 = vector(0, 1, 0)
     r = 0.05
@@ -58,7 +59,8 @@ def simulate(angular_freq_mult: float = 1, time_per_sec: float=1.25e-8, rate_val
     E = charge_shell(5000, pos, neg, field_vectors)
 
     # graphs
-    ke_graph = graph(title="Kinetic Energy vs Time", xtitle="Time (ns)", ytitle="KE (eV)", xmin=0, ymin=0)
+    ke_graph = graph(title="Kinetic Energy vs Time", xtitle="Time (ns)", ytitle="KE (eV)", xmin=0, ymin=0,
+                     width=560, height=420, align='left')
     gc = gcurve(color=color.blue)
 
     # Time variables
