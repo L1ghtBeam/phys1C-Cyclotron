@@ -1,6 +1,6 @@
-from vpython import *
 from argparse import ArgumentParser
 
+from vpython import *
 
 ## CONSTANTS ##
 qe = 1.6022e-19
