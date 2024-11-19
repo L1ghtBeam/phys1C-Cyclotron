@@ -89,7 +89,8 @@ def simulate(
 
         if t > period and not radius_printed:
             r = distance(diameter.point(0)['pos'], diameter.point(1)['pos'])/2
-            print(f"radius = {r:.3f} m")
+            print(f"radius = {r:.3f} m"
+                  f"\ntime = {t*1e9:.3g} ns")
             radius_printed = True
 
 
